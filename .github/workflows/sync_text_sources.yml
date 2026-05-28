@@ -1,0 +1,42 @@
+name: Sync text knowledge sources
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'data/jkeratin_kb.sqlite'
+      - 'scripts/export_sources_from_sqlite.py'
+      - 'data_source/**'
+      - 'scripts/build_sqlite_from_sources.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[skip-source-sync]') }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Export SQLite to text sources when missing
+        run: |
+          if [ ! -d data_source/questions ]; then
+            python scripts/export_sources_from_sqlite.py
+          fi
+      - name: Rebuild SQLite from text sources
+        run: |
+          python scripts/build_sqlite_from_sources.py
+      - name: Commit synchronized knowledge source files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data_source data/jkeratin_kb.sqlite
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Sync text knowledge sources [skip-source-sync]"
+            git push
+          fi
