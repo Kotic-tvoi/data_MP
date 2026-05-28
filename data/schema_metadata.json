@@ -1,0 +1,42 @@
+{
+  "00_Инструкция": {
+    "table": "c_00_instrukciya",
+    "rows": 7
+  },
+  "01_Дашборд": {
+    "table": "c_01_dashbord",
+    "rows": 10
+  },
+  "02_Вопросы_Разметка": {
+    "table": "c_02_voprosy_razmetka",
+    "rows": 2739
+  },
+  "03_Вопросы_RAW": {
+    "table": "c_03_voprosy_raw",
+    "rows": 2739
+  },
+  "04_Справочник_товаров": {
+    "table": "c_04_spravochnik_tovarov",
+    "rows": 153
+  },
+  "05_FAQ_Шаблоны": {
+    "table": "c_05_faq_shablony",
+    "rows": 15
+  },
+  "06_Синонимы_поиска": {
+    "table": "c_06_sinonimy_poiska",
+    "rows": 25
+  },
+  "07_Запрещенные_формулировки": {
+    "table": "c_07_zapreschennye_formulirovki",
+    "rows": 12
+  },
+  "08_Import_Logs": {
+    "table": "c_08_import_logs",
+    "rows": 1
+  },
+  "09_Промты": {
+    "table": "c_09_promty",
+    "rows": 1
+  }
+}
