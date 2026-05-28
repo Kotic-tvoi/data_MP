@@ -3,6 +3,8 @@ name: Query Amino Base 400 reviews
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -13,9 +15,7 @@ jobs:
       - name: Query SQLite database
         run: |
           python - <<'PY'
-          import csv
           import json
-          import os
           import re
           import sqlite3
           from datetime import datetime
@@ -32,12 +32,11 @@ jobs:
               text = norm(value)
               if not text:
                   return None
-              patterns = [
+              for p in [
                   "%d.%m.%Y", "%d.%m.%Y %H:%M:%S", "%d.%m.%Y %H:%M",
                   "%Y-%m-%d", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S",
                   "%m/%d/%Y", "%m/%d/%Y %H:%M:%S",
-              ]
-              for p in patterns:
+              ]:
                   try:
                       return datetime.strptime(text[:len(datetime.now().strftime(p))], p)
                   except Exception:
@@ -54,7 +53,7 @@ jobs:
               n = name.lower()
               return any(x in n for x in ["date", "data", "дата", "created", "published"])
 
-          def is_review_table_or_col(table, cols):
+          def is_review_related(table, cols):
               text = (table + " " + " ".join(cols)).lower()
               return any(x in text for x in ["review", "reviews", "отзыв", "otzyv", "feedback", "rating", "оценк", "reit"])
 
@@ -64,6 +63,7 @@ jobs:
 
           dbs = sorted([p for p in Path('.').rglob('*') if p.is_file() and p.suffix.lower() in {'.sqlite', '.db', '.sqlite3'}])
           print('DB_FILES_FOUND=' + json.dumps([str(p) for p in dbs], ensure_ascii=False))
+
           all_matches = []
           table_summary = []
 
@@ -82,8 +82,6 @@ jobs:
                   if not date_cols:
                       continue
 
-                  # Pull only rows where any column contains Amino/Base/400 separately when possible.
-                  # For reliability on mixed schemas, scan table rows in Python.
                   for row in conn.execute(f'SELECT rowid AS __rowid__, * FROM "{table}"'):
                       row_dict = dict(row)
                       row_text = " | ".join(norm(v) for k, v in row_dict.items() if k != "__rowid__")
@@ -95,13 +93,8 @@ jobs:
                           continue
                       if not any(START <= d <= END for d in dates):
                           continue
-                      if not is_review_table_or_col(table, cols):
-                          # Keep as possible match, but mark it.
-                          kind = "possible_non_review_table"
-                      else:
-                          kind = "review_match"
                       all_matches.append({
-                          "kind": kind,
+                          "kind": "review_match" if is_review_related(table, cols) else "possible_non_review_table",
                           "db": str(db),
                           "table": table,
                           "rowid": row_dict.get("__rowid__"),
@@ -110,12 +103,17 @@ jobs:
                       })
               conn.close()
 
-          print('TABLE_SUMMARY_START')
-          print(json.dumps(table_summary, ensure_ascii=False, indent=2)[:60000])
-          print('TABLE_SUMMARY_END')
-
           review_matches = [m for m in all_matches if m['kind'] == 'review_match']
           possible_matches = [m for m in all_matches if m['kind'] != 'review_match']
+          result = {
+              "db_files_found": [str(p) for p in dbs],
+              "table_summary": table_summary,
+              "review_matches_count": len(review_matches),
+              "possible_matches_count": len(possible_matches),
+              "review_matches": review_matches,
+              "possible_matches": possible_matches,
+          }
+          Path('query_results.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
 
           print('MATCHES_COUNT=' + json.dumps({"review_matches": len(review_matches), "possible_matches": len(possible_matches)}, ensure_ascii=False))
           print('REVIEW_MATCHES_JSON_START')
@@ -125,3 +123,8 @@ jobs:
           print(json.dumps(possible_matches, ensure_ascii=False, indent=2)[:120000])
           print('POSSIBLE_MATCHES_JSON_END')
           PY
+      - name: Upload query result
+        uses: actions/upload-artifact@v4
+        with:
+          name: amino-base-400-reviews-query-results
+          path: query_results.json
