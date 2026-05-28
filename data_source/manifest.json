@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-05-28T10:53:05.142449+00:00",
+  "source_database": "data/jkeratin_kb.sqlite",
+  "table_map": {
+    "questions": "c_02_voprosy_razmetka",
+    "questions_raw": "c_03_voprosy_raw",
+    "products": "c_04_spravochnik_tovarov",
+    "faq_templates": "c_05_faq_shablony",
+    "forbidden_phrases": "c_06_zapreschennye_formulirovki",
+    "synonyms": "c_07_sinonimy_poiska",
+    "prompts": "c_09_promty"
+  },
+  "files": {
+    "products.csv": 143,
+    "faq_templates.jsonl": 14,
+    "forbidden_phrases.jsonl": 12,
+    "synonyms.jsonl": 27,
+    "prompts.jsonl": 1,
+    "manual_updates.jsonl": "append-only",
+    "questions": {
+      "2021": 244,
+      "2022": 564,
+      "2023": 609,
+      "2024": 614,
+      "2025": 463,
+      "2026": 245
+    }
+  },
+  "purpose": "Текстовая база знаний для чтения и обновления через ChatGPT/GitHub. SQLite пересобирается из этих файлов."
+}
