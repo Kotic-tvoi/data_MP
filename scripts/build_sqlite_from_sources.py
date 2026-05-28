@@ -38,11 +38,18 @@ def columns(rows: list[dict[str, str]]) -> list[str]:
     return result or ["value"]
 
 
+def sql_col(name: str) -> str:
+    if name.lower() in {"_pk", "rowid", "oid"}:
+        return "source_" + name
+    return name
+
+
 def create_table(conn: sqlite3.Connection, name: str, rows: list[dict[str, str]]) -> None:
-    cols = columns(rows)
+    original_cols = columns(rows)
+    cols = [sql_col(c) for c in original_cols]
     conn.execute(f'DROP TABLE IF EXISTS "{name}"')
     conn.execute(
-        f'CREATE TABLE "{name}" (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+        f'CREATE TABLE "{name}" (_pk INTEGER PRIMARY KEY AUTOINCREMENT, '
         + ", ".join(f'"{c}" TEXT' for c in cols)
         + ")"
     )
@@ -53,7 +60,7 @@ def create_table(conn: sqlite3.Connection, name: str, rows: list[dict[str, str]]
     for row in rows:
         conn.execute(
             f'INSERT INTO "{name}" ({col_sql}) VALUES ({placeholders})',
-            [row.get(c, "") for c in cols],
+            [row.get(c, "") for c in original_cols],
         )
 
 
@@ -92,21 +99,21 @@ def main() -> int:
     for row in questions:
         insert_search(
             "questions",
-            row.get("question_id") or row.get("id") or "",
-            row.get("product_name") or row.get("seller_sku") or row.get("wb_sku") or "",
+            row.get("question_id") or row.get("id_voprosa") or row.get("id") or "",
+            row.get("nazvanie_tovara") or row.get("product_name") or row.get("seller_sku") or row.get("wb_sku") or "",
             " | ".join(str(v) for v in row.values()),
-            " | ".join([row.get("theme", ""), row.get("subtheme", ""), row.get("keywords", "")]),
+            " | ".join([row.get("tema", ""), row.get("theme", ""), row.get("podtema", ""), row.get("keywords", ""), row.get("klyuchevye_slova", "")]),
         )
     for row in manual_updates:
         insert_search("manual_updates", row.get("id", ""), row.get("product", ""), " | ".join(str(v) for v in row.values()), row.get("theme", ""))
     for row in products:
-        insert_search("products", row.get("wb_sku", ""), row.get("nazvanie_kratkoe") or row.get("product_name", ""), " | ".join(str(v) for v in row.values()), row.get("category", ""))
+        insert_search("products", row.get("artikul_wb") or row.get("wb_sku", ""), row.get("nazvanie_tovara") or row.get("nazvanie_kratkoe") or row.get("product_name", ""), " | ".join(str(v) for v in row.values()), row.get("kategoriya") or row.get("category", ""))
     for row in faq:
-        insert_search("faq_templates", row.get("faq_id", ""), row.get("theme", ""), " | ".join(str(v) for v in row.values()), row.get("product_category", ""))
+        insert_search("faq_templates", row.get("faq_id", ""), row.get("tema") or row.get("theme", ""), " | ".join(str(v) for v in row.values()), row.get("kategoriya_tovara") or row.get("product_category", ""))
     for row in forbidden:
-        insert_search("forbidden_phrases", "", row.get("situation", ""), " | ".join(str(v) for v in row.values()), "")
+        insert_search("forbidden_phrases", "", row.get("situaciya") or row.get("situation", ""), " | ".join(str(v) for v in row.values()), "")
     for row in synonyms:
-        insert_search("synonyms", "", row.get("client_phrase", ""), " | ".join(str(v) for v in row.values()), "")
+        insert_search("synonyms", "", row.get("klient_pishet") or row.get("client_phrase", ""), " | ".join(str(v) for v in row.values()), "")
 
     conn.commit()
     conn.close()
