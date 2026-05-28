@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = ROOT / "data" / "jkeratin_kb.sqlite"
 OUT = ROOT / "data_source"
 
+# Touch this file to trigger sync_text_sources workflow when manual button is not visible.
+
 
 def norm(value: Any) -> str:
     return "" if value is None else str(value).strip()
