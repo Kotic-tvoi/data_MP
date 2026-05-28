@@ -1,0 +1,13 @@
+BEGIN TRANSACTION;
+CREATE TABLE "c_00_instrukciya" (id INTEGER PRIMARY KEY AUTOINCREMENT, "razdel" TEXT, "opisanie" TEXT);
+CREATE TABLE "c_01_dashbord" (id INTEGER PRIMARY KEY AUTOINCREMENT, "column_1" TEXT, "column_2" TEXT, "column_3" TEXT, "baza_znaniy_jkeratin_voprosy_klientov" TEXT);
+CREATE TABLE "c_02_voprosy_razmetka" (id INTEGER PRIMARY KEY AUTOINCREMENT, "id_voprosa" TEXT, "data" TEXT, "artikul_prodavca" TEXT, "artikul_wb" TEXT, "brend_iz_raw" TEXT, "tekst_voprosa" TEXT, "staryy_otvet" TEXT, "nazvanie_tovara" TEXT, "kategoriya_tovara" TEXT, "lineyka" TEXT, "tema" TEXT, "podtema" TEXT, "tip_voprosa" TEXT, "smysl_voprosa" TEXT, "klyuchevye_slova" TEXT, "status_otveta" TEXT, "mozhno_ispolzovat_kak_shablon" TEXT, "novyy_shablon_otveta" TEXT, "zaprescheno_pisat" TEXT, "ogranicheniya_chto_uchityvat" TEXT, "kommentariy_avtorazmetki" TEXT);
+CREATE TABLE "c_03_voprosy_raw" (id INTEGER PRIMARY KEY AUTOINCREMENT, "id_voprosa" TEXT, "data" TEXT, "artikul_prodavca" TEXT, "artikul_wb" TEXT, "brend" TEXT, "tekst_voprosa" TEXT, "otvet" TEXT);
+CREATE TABLE "c_04_spravochnik_tovarov" (id INTEGER PRIMARY KEY AUTOINCREMENT, "artikul_wb" TEXT, "artikul_prodavca" TEXT, "nazvanie_tovara" TEXT, "kategoriya" TEXT, "lineyka" TEXT, "obem" TEXT, "aktualen" TEXT, "istochnik" TEXT, "kommentariy" TEXT);
+CREATE TABLE "c_05_faq_shablony" (id INTEGER PRIMARY KEY AUTOINCREMENT, "faq_id" TEXT, "tema" TEXT, "podtema" TEXT, "kategoriya_tovara" TEXT, "situaciya_klienta" TEXT, "gotovyy_otvet" TEXT, "chto_nelzya_pisat" TEXT, "ton" TEXT, "status" TEXT, "istochnik" TEXT);
+CREATE TABLE "c_06_sinonimy_poiska" (id INTEGER PRIMARY KEY AUTOINCREMENT, "klient_pishet" TEXT, "iskat_kak" TEXT, "tema" TEXT, "kommentariy" TEXT);
+CREATE TABLE "c_07_zapreschennye_formulirovki" (id INTEGER PRIMARY KEY AUTOINCREMENT, "situaciya" TEXT, "nelzya_pisat" TEXT, "kak_luchshe_pisat" TEXT, "kommentariy" TEXT);
+CREATE TABLE "c_08_import_logs" (id INTEGER PRIMARY KEY AUTOINCREMENT, "data_importa" TEXT, "istochnik" TEXT, "fayl" TEXT, "kolvo_strok" TEXT, "kolvo_novyh" TEXT, "kolvo_dubley" TEXT, "kommentariy" TEXT);
+CREATE TABLE "c_09_promty" (id INTEGER PRIMARY KEY AUTOINCREMENT, "nazvanie" TEXT, "zadacha" TEXT, "gotovyy_promt_dlya_raboty_s_bazoy" TEXT);
+CREATE VIRTUAL TABLE kb_search USING fts5(source_table, source_id, title, body, tags);
+COMMIT;
