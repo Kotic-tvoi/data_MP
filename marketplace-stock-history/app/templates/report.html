@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block content %}
+<h1>Отчёт {{ report.marketplace|upper }} #{{ report.id }}</h1>
+<p class="muted">{{ report.collected_at or report.started_at }} · {{ report.rows_count }} строк · {{ report.warehouses_count }} складов</p>
+<div class="actions"><a href="/api/reports/{{ report.id }}/download?format=xlsx">Скачать XLSX</a><a href="/api/reports/{{ report.id }}/download?format=csv">CSV</a><a href="/api/reports/{{ report.id }}/download?format=json">JSON</a></div>
+<h2>Сводка по складам</h2><div class="table-wrap"><table><thead><tr><th>Склад</th><th>Регион</th><th>Схема</th><th>Позиций</th><th>Доступно</th><th>Резерв</th><th>К клиенту</th><th>Возврат</th></tr></thead><tbody>
+{% for r in summary %}<tr><td>{{ r.warehouse_name }} ({{ r.warehouse_id }})</td><td>{{ r.region_name }}</td><td>{{ r.fulfillment_type }}</td><td>{{ r.positions_count }}</td><td>{{ r.available }}</td><td>{{ r.reserved }}</td><td>{{ r.in_way_to_customer }}</td><td>{{ r.in_way_from_customer }}</td></tr>{% endfor %}
+</tbody></table></div>
+<h2>Товары на складах</h2><form class="actions"><input name="q" value="{{ q }}" placeholder="Артикул, SKU, название"><select name="warehouse"><option value="">Все склады</option>{% for r in summary %}<option value="{{ r.warehouse_name }}" {% if warehouse==r.warehouse_name %}selected{% endif %}>{{ r.warehouse_name }}</option>{% endfor %}</select><button>Найти</button></form>
+<div class="table-wrap"><table><thead><tr><th>Склад</th><th>Схема</th><th>Товар</th><th>Артикул</th><th>SKU</th><th>Размер</th><th>Доступно</th><th>Резерв</th><th>К клиенту</th><th>Возврат</th></tr></thead><tbody>
+{% for r in items %}<tr><td>{{ r.warehouse_name }}</td><td>{{ r.fulfillment_type }}</td><td>{{ r.product_name }}</td><td>{{ r.offer_id or r.vendor_code }}</td><td>{{ r.sku }}</td><td>{{ r.size_name }}</td><td>{{ r.available }}</td><td>{{ r.reserved }}</td><td>{{ r.in_way_to_customer }}</td><td>{{ r.in_way_from_customer }}</td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}

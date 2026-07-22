@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block content %}
+<h1>Остатки WB и Ozon</h1>
+<div class="cards">
+{% for name, report in [('Wildberries', wb), ('Ozon', ozon)] %}
+<div class="card"><h2>{{ name }}</h2>{% if report %}
+<div class="metric">{{ report.total_available }} шт.</div><p class="muted">{{ report.warehouses_count }} складов · {{ report.rows_count }} строк</p>
+<p class="ok">Последний отчёт: {{ report.collected_at }}</p><a href="/reports/{{ report.id }}">Открыть отчёт</a>
+{% else %}<p class="muted">Успешных отчётов пока нет</p>{% endif %}</div>{% endfor %}
+</div>
+<h2>История</h2><div class="table-wrap"><table><thead><tr><th>ID</th><th>Дата</th><th>МП</th><th>Статус</th><th>Складов</th><th>Строк</th><th>Доступно</th><th>Резерв</th><th></th></tr></thead><tbody>
+{% for r in reports %}<tr><td>{{ r.id }}</td><td>{{ r.collected_at or r.started_at }}</td><td>{{ r.marketplace|upper }}</td><td class="{{ 'ok' if r.status=='success' else 'bad' }}">{{ r.status }}</td><td>{{ r.warehouses_count }}</td><td>{{ r.rows_count }}</td><td>{{ r.total_available }}</td><td>{{ r.total_reserved }}</td><td><a href="/reports/{{ r.id }}">Открыть</a></td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}
